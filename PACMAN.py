@@ -1,7 +1,8 @@
 import pygame
 pygame.init()
 
-window = pygame.display.set_mode((500, 500))
+winsize = 500
+window = pygame.display.set_mode((winsize, winsize))
 
 pygame.display.set_caption("PACMAN")
 
@@ -10,7 +11,7 @@ y = 50
 diameter = 10
 vel = 2
 
-direction = "LEFT"
+direction = "STILL"
 run = True
 while run:
     pygame.time.delay(15)
@@ -40,6 +41,8 @@ while run:
         y -= vel        
     elif direction is "DOWN":
         y += vel
+    elif direction is "STILL":
+        y = y
         
     print("x =", x, "   y =", y)
     window.fill((0, 0, 0))
