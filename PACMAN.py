@@ -7,12 +7,32 @@ window = pygame.display.set_mode((winsize, winsize))  #loob uue akna
 
 pygame.display.set_caption("PACMAN")  #akna nimetus
 
+
+
 level = 1
 x = 270 #pacmani koordinaat x, alguses 270
 y = 330  #pacmani koordinaat y, alguses 330
 diameter = 30  #pacmani suurus pikslites
 ghostsize = 30
 ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
+
+pacmansheet = pygame.image.load("pacmansprites.png").convert()
+cells = []
+for n in range(6):
+    width, height = (30, 30)
+    rect = pygame.Rect(n * width, 0, width, height)
+    image = pygame.Surface(rect.size).convert()
+    image.blit(pacmansheet, (0, 0), rect)
+    alpha = image.get_at((0,0))
+    image.set_colorkey(alpha)
+    cells.append(image)
+    
+playerImg = cells[0]
+frame = 1
+temp = 1
+player = playerImg.get_rect()
+player.x = x
+player.y = y
 
 i1 = 0  #ghost 1 counter
 xg1 = 240  #ghost 1 position x
@@ -876,11 +896,23 @@ while run:  #kordab igavesti
     
     window.fill((0, 0, 0))  #taust mustaks
     window.blit(walls, (0, 0))  #lisa labyrint
-    rect1 = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loo/joonista pacman
+    
+    rect1 = pygame.Rect(x, y, diameter, diameter)  #loo/joonista pacman
     ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, ghostsize, ghostsize])
     ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, ghostsize, ghostsize])
     ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, ghostsize, ghostsize])
     ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, ghostsize, ghostsize])
+    
+    
+    if temp < 5:
+        temp += 1
+    else:
+        temp = 1
+        frame += 1
+        if frame >= len(cells):
+            frame = 1
+    playerImg = cells[frame]    
+    window.blit(playerImg, (x, y))
     pygame.display.update() #update display
     
 pygame.quit()

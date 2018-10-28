@@ -23,7 +23,7 @@ bl = False  #bottomleft
 br = False  #bottomright
 
 
-walls = pygame.image.load("walls.png")  #load labyrindi pilt/taust
+walls = pygame.image.load("walls1.png")  #load labyrindi pilt/taust
 window.blit(walls, (0, 0))  #asetab labyrindi/tausta koordinaatidele 0, 0
 wallmask = pygame.mask.from_surface(walls)  #teeb labyrindist maski, et seda colliderina kasutada
 rect1 = pygame.draw.rect(window, (255, 255, 255), [x, y, diameter, diameter])  #loob ja joonistab pacmani rectangle
@@ -150,13 +150,13 @@ while run:  #kordab igavesti
     
     window.fill((0, 0, 0))  #taust mustaks
     window.blit(walls, (0, 0))  #lisa labyrint
-    rect1 = pygame.draw.rect(window, (255, 255, 255), [x, y, diameter, diameter])  #loo/joonista pacman
+    rect1 = pygame.draw.rect(window, (0, 255, 255), [x, y, diameter, diameter])  #loo/joonista pacman
     
 
     punkt = pygame.image.load("punkt.png")
     
-        if ((x * 0.13) + y != 63.9):
-            window.blit(punkt, (41, 71))
+    if ((x * 0.13) + y != 63.9):
+        window.blit(punkt, (41, 71))
     
     pygame.display.update() #update display
 
