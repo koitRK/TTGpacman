@@ -12,7 +12,7 @@ x = 270 #pacmani koordinaat x, alguses 270
 y = 330  #pacmani koordinaat y, alguses 330
 diameter = 30  #pacmani suurus pikslites
 ghostsize = 30
-ghostturntime = 125  #ghost muudab suunda iga x pixli tagant
+ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
 
 i1 = 0  #ghost 1 counter
 xg1 = 240  #ghost 1 position x
@@ -26,11 +26,16 @@ i3 = 0  #ghost 3 counter
 xg3 = 300  #ghost 3 position x
 yg3 = 270  #ghost 3 position y
 
+i4 = 0  #ghost 4 counter
+xg4 = 300  #ghost 4 position x
+yg4 = 270  #ghost 4 position y
+
 vel = 1 #pacmani kiirus !!! PEAB OLEMA 1 !!!
 
 directionlist1 = ["LEFT", "RIGHT", "UP", "DOWN"]
 directionlist2 = ["LEFT", "RIGHT", "UP", "DOWN"]
 directionlist3 = ["LEFT", "RIGHT", "UP", "DOWN"]
+directionlist4 = ["LEFT", "RIGHT", "UP", "DOWN"]
 
 
 # pacman colliders
@@ -73,6 +78,27 @@ rb3 = False  #rightbottom
 bl3 = False  #bottomleft
 br3 = False  #bottomright
 
+# ghost4 colliders
+tl4 = False  #topleft
+tr4 = False  #topright
+lt4 = False  #lefttop
+lb4 = False  #leftbottom
+rt4 = False  #righttop
+rb4 = False  #rightbottom
+bl4 = False  #bottomleft
+br4 = False  #bottomright
+
+direction = "STILL"  #pacman seisab alguses paigal
+nextdirection = "STILL"  #pacman seisab alguses paigal
+direction1 = "STILL"
+nextdirection1 = "STILL"
+direction2 = "STILL"
+nextdirection2 = "STILL"
+direction3 = "STILL"
+nextdirection3 = "STILL"
+direction4 = "STILL"
+nextdirection4 = "STILL"
+
 level = input("Vali level: 1, 2, 3, 4")
 
 
@@ -83,25 +109,16 @@ rect1 = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #lo
 ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, ghostsize, ghostsize])
 ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, ghostsize, ghostsize])
 ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, ghostsize, ghostsize])
+ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, ghostsize, ghostsize])
 pygame.display.update()
 
 
-#netist leitud, vaatab, kas kaks objekti kattuvad. Return True or False
+#netist leitud, vaatab, kas kaks objekti kattuvad.
 #u = esimese objekti punkt, v = terve teine object
 def sub(u, v):
     return [ u[i]-v[i] for i in range(len(u)) ]
 
 
-
-
-direction = "STILL"  #pacman seisab alguses paigal
-nextdirection = "STILL"  #pacman seisab alguses paigal
-direction1 = "STILL"
-nextdirection1 = "STILL"
-direction2 = "STILL"
-nextdirection2 = "STILL"
-direction3 = "STILL"
-nextdirection3 = "STILL"
 
 run = True
 
@@ -214,7 +231,7 @@ while run:  #kordab igavesti
     else:
         pass
     
-    if rect1.colliderect(ghost1) or rect1.colliderect(ghost2) or rect1.colliderect(ghost3):  #detect collision, Kui pacman puutub ghosti
+    if rect1.colliderect(ghost1) or rect1.colliderect(ghost2) or rect1.colliderect(ghost3) or rect1.colliderect(ghost4):  #detect collision, Kui pacman puutub ghosti
         GameOver()
     
      
@@ -264,15 +281,90 @@ while run:  #kordab igavesti
     else:
         br1 = False
         
+    
+    if x > xg1:  # pacman paremal
         
+        if y == yg1:  #pacman paremal
+            if not (rt1 or rb1):
+                i1 = ghostturntime + 1
+                directionlist1 = ["RIGHT"]
+                
+        elif y > yg1:  #pacman paremal all
+            if not (rt1 or rb1):  #pacman paremal all, parem serv vaba
+                if not (bl1 or br1):  #pacman paremal all, parem ja alumine serv vaba
+                    directionlist1 = ["RIGHT", "DOWN"]
+                else:  #pacman paremal all, parem serv vaba, alumine serv kinni
+                    directionlist1 = ["RIGHT"]
+            else:  #pacman paremal all, parem serv kinni
+                if not (bl1 or br1):  #pacman paremal all, parem serv kinni, alumine serv vaba
+                    directionlist1 = ["DOWN"]
+                else:  #pacman paremal all, parem ja alumine serv kinni
+                    directionlist1 = ["LEFT", "UP"]
+                    
+        elif y < yg1:  #pacman paremal yleval
+            if not (rt1 or rb1):  #pacman paremal yleval, parem serv vaba
+                if not (tl1 or tr1):  #pacman paremal yleval, parem ja ylemine serv vaba
+                    directionlist1 = ["RIGHT", "UP"]
+                else:  #pacman paremal yleval, parem serv vaba, ylemine serv kinni
+                    directionlist1 = ["RIGHT"]
+            else:  #pacman paremal yleval, parem serv kinni
+                if not (tl1 or tr1):  #pacman paremal yleval, parem serv kinni, ylemine serv vaba
+                    directionlist1 = ["UP"]
+                else:  #pacman paremal yleval, parem ja ylemine serv kinni
+                    directionlist1 = ["LEFT", "DOWN"]
+    
+        
+    elif x < xg1:  #pacman vasakul
+        
+        if y == yg1:  #pacman vasakul
+            if not (lt1 or lb1):
+                i1 = ghostturntime + 1
+                directionlist1 = ["LEFT"]
+                
+        elif y > yg1:  #pacman vasakul all
+            if not (lt1 or lb1):  #pacman vasakul all, vasak serv vaba
+                if not (bl1 or br1):  #pacman vasakul all, vasak ja alumine serv vaba
+                    directionlist1 = ["LEFT", "DOWN"]
+                else:  #pacman vasakul all, vasak serv vaba, alumine serv kinni
+                    directionlist1 = ["LEFT"]
+            else:  #pacman vasakul all, vasak serv kinni
+                if not (bl1 or br1):  #pacman vasakul all, vasak serv kinni, alumine serv vaba
+                    directionlist1 = ["DOWN"]
+                else:  #pacman vasakul all, vasak ja alumine serv kinni
+                    directionlist1 = ["RIGHT", "UP"]
+                    
+        elif y < yg1:  #pacman vasakul yleval
+            if not (lt1 or lb1):  #pacman vasakul yleval, vasak serv vaba
+                if not (tl1 or tr1):  #pacman vasakul yleval, vasak ja ylemine serv vaba
+                    directionlist1 = ["LEFT", "UP"]
+                else:  #pacman vasakul yleval, vasak serv vaba, ylemine serv kinni
+                    directionlist1 = ["LEFT"]
+            else:  #pacman vasakul yleval, vasak serv kinni
+                if not (tl1 or tr1):  #pacman vasakul yleval, vasak serv kinni, ylemine serv vaba
+                    directionlist1 = ["UP"]
+                else:  #pacman vasakul yleval, vasak ja ylemine serv kinni
+                    directionlist1 = ["RIGHT", "DOWN"]
+                    
+                
+    elif x == xg1:  
+        if y > yg1:  #pacman all
+            if not (bl1 or br1):
+                i1 = ghostturntime + 1
+                directionlist1 = ["DOWN"]
+        if y < yg1:  #pacman yleval
+            if not (tl1 or tr1):
+                i1 = ghostturntime + 1
+                directionlist1 = ["UP"]
+                
+            
     if i1 > ghostturntime:
-        i1 = 0
+        i1 = random.randint(30, ghostturntime - 30)
         nextdirection1 = random.choice(directionlist1)
     else:
         i1 += 1
-    
         
-        #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
+         
+    #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
     if (nextdirection1 is "LEFT") and not (lt1 or lb1):
         direction1 = nextdirection1
     elif (nextdirection1 is "RIGHT") and not (rt1 or rb1):
@@ -302,6 +394,8 @@ while run:  #kordab igavesti
     else:
         pass
     
+        
+    
     if direction1 is "LEFT":
         xg1 -= vel
     elif direction1 is "RIGHT":
@@ -314,13 +408,20 @@ while run:  #kordab igavesti
         yg1 = yg1
         xg1 = xg1
         i1 = ghostturntime + 1
+        
     else:
         pass
+    
+    
+
+            
+    
+    
     
     #################################### G H O S T 1 #####################################
     #################################### G H O S T 2 #####################################
     
-        #colliderid...  
+    #colliderid...  
     rel_point = sub((xg2, yg2 - 1), [0, 0])
     if wallmask.get_at(rel_point): 
         tl2 = True
@@ -362,21 +463,96 @@ while run:  #kordab igavesti
     else:
         br2 = False
         
+    
+    if x > xg2:  # pacman paremal
+        '''
+        if y == yg2:  #pacman paremal
+            if not (rt2 or rb2):
+                i2 = ghostturntime + 1
+                directionlist2 = ["RIGHT"]
+        '''        
+        if y > yg2:  #pacman paremal all
+            if not (rt2 or rb2):  #pacman paremal all, parem serv vaba
+                if not (bl2 or br2):  #pacman paremal all, parem ja alumine serv vaba
+                    directionlist2 = ["RIGHT", "DOWN"]
+                else:  #pacman paremal all, parem serv vaba, alumine serv kinni
+                    directionlist2 = ["RIGHT"]
+            else:  #pacman paremal all, parem serv kinni
+                if not (bl2 or br2):  #pacman paremal all, parem serv kinni, alumine serv vaba
+                    directionlist2 = ["DOWN"]
+                else:  #pacman paremal all, parem ja alumine serv kinni
+                    directionlist2 = ["LEFT", "UP"]
+                    
+        elif y < yg2:  #pacman paremal yleval
+            if not (rt2 or rb2):  #pacman paremal yleval, parem serv vaba
+                if not (tl2 or tr2):  #pacman paremal yleval, parem ja ylemine serv vaba
+                    directionlist2 = ["RIGHT", "UP"]
+                else:  #pacman paremal yleval, parem serv vaba, ylemine serv kinni
+                    directionlist2 = ["RIGHT"]
+            else:  #pacman paremal yleval, parem serv kinni
+                if not (tl2 or tr2):  #pacman paremal yleval, parem serv kinni, ylemine serv vaba
+                    directionlist2 = ["UP"]
+                else:  #pacman paremal yleval, parem ja ylemine serv kinni
+                    directionlist2 = ["LEFT", "DOWN"]
+    
         
+    elif x < xg2:  #pacman vasakul
+        '''
+        if y == yg2:  #pacman vasakul
+            if not (lt2 or lb2):
+                i2 = ghostturntime + 1
+                directionlist2 = ["LEFT"]
+        '''        
+        if y > yg2:  #pacman vasakul all
+            if not (lt2 or lb2):  #pacman vasakul all, vasak serv vaba
+                if not (bl2 or br2):  #pacman vasakul all, vasak ja alumine serv vaba
+                    directionlist2 = ["LEFT", "DOWN"]
+                else:  #pacman vasakul all, vasak serv vaba, alumine serv kinni
+                    directionlist2 = ["LEFT"]
+            else:  #pacman vasakul all, vasak serv kinni
+                if not (bl2 or br2):  #pacman vasakul all, vasak serv kinni, alumine serv vaba
+                    directionlist2 = ["DOWN"]
+                else:  #pacman vasakul all, vasak ja alumine serv kinni
+                    directionlist2 = ["RIGHT", "UP"]
+                    
+        elif y < yg2:  #pacman vasakul yleval
+            if not (lt2 or lb2):  #pacman vasakul yleval, vasak serv vaba
+                if not (tl2 or tr2):  #pacman vasakul yleval, vasak ja ylemine serv vaba
+                    directionlist2 = ["LEFT", "UP"]
+                else:  #pacman vasakul yleval, vasak serv vaba, ylemine serv kinni
+                    directionlist2 = ["LEFT"]
+            else:  #pacman vasakul yleval, vasak serv kinni
+                if not (tl2 or tr2):  #pacman vasakul yleval, vasak serv kinni, ylemine serv vaba
+                    directionlist2 = ["UP"]
+                else:  #pacman vasakul yleval, vasak ja ylemine serv kinni
+                    directionlist2 = ["RIGHT", "DOWN"]
+                    
+    '''            
+    elif x == xg2:  
+        if y > yg2:  #pacman all
+            if not (bl2 or br2):
+                i2 = ghostturntime + 1
+                directionlist2 = ["DOWN"]
+        if y < yg2:  #pacman yleval
+            if not (tl2 or tr2):
+                i2 = ghostturntime + 1
+                directionlist2 = ["UP"]
+    '''            
+            
     if i2 > ghostturntime:
-        i2 = 0
+        i2 = random.randint(0, ghostturntime / 4)
         nextdirection2 = random.choice(directionlist2)
     else:
         i2 += 1
-    
         
-        #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
+         
+    #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
     if (nextdirection2 is "LEFT") and not (lt2 or lb2):
         direction2 = nextdirection2
     elif (nextdirection2 is "RIGHT") and not (rt2 or rb2):
         direction2 = nextdirection2
     elif (nextdirection2 is "UP") and not (tl2 or tr2):
-        direction2 = nextdirection2      
+        direction2 = nextdirection2       
     elif (nextdirection2 is "DOWN") and not (bl2 or br2):
         direction2 = nextdirection2
     
@@ -400,6 +576,8 @@ while run:  #kordab igavesti
     else:
         pass
     
+        
+    
     if direction2 is "LEFT":
         xg2 -= vel
     elif direction2 is "RIGHT":
@@ -412,8 +590,10 @@ while run:  #kordab igavesti
         yg2 = yg2
         xg2 = xg2
         i2 = ghostturntime + 1
+        
     else:
         pass
+    
     
     #################################### G H O S T 2 #####################################
     #################################### G H O S T 3 #####################################
@@ -461,20 +641,95 @@ while run:  #kordab igavesti
         br3 = False
         
         
+    if x < xg3:  # pacman vasakul
+        
+        if y == yg3:  #pacman vasakul
+            if not (rt3 or rb3):
+                i3 = ghostturntime + 1
+                directionlist3 = ["RIGHT"]
+                
+        elif y < yg3:  #pacman vasakul yleval
+            if not (rt3 or rb3):  #pacman vasakul yleval, parem serv vaba
+                if not (bl3 or br3):  #pacman vasakul yleval, parem ja alumine serv vaba
+                    directionlist3 = ["RIGHT", "DOWN"]
+                else:  #pacman vasakul yleval, parem serv vaba, alumine serv kinni
+                    directionlist3 = ["RIGHT"]
+            else:  #pacman vasakul yleval, parem serv kinni
+                if not (bl3 or br3):  #pacman vasakul yleval, parem serv kinni, alumine serv vaba
+                    directionlist3 = ["DOWN"]
+                else:  #pacman vasakul yleval, parem ja alumine serv kinni
+                    directionlist3 = ["LEFT", "UP"]
+                    
+        elif y > yg3:  #pacman vasakul all
+            if not (rt3 or rb3):  #pacman vasakul all, parem serv vaba
+                if not (tl3 or tr3):  #pacman vasakul all, parem ja ylemine serv vaba
+                    directionlist3 = ["RIGHT", "UP"]
+                else:  #pacman vasakul all, parem serv vaba, ylemine serv kinni
+                    directionlist3 = ["RIGHT"]
+            else:  #pacman vasakul all, parem serv kinni
+                if not (tl3 or tr3):  #pacman vasakul all, parem serv kinni, ylemine serv vaba
+                    directionlist3 = ["UP"]
+                else:  #pacman vasakul all, parem ja ylemine serv kinni
+                    directionlist3 = ["LEFT", "DOWN"]
+    
+        
+    elif x > xg3:  #pacman paremal
+        
+        if y == yg3:  #pacman paremal
+            if not (lt3 or lb3):
+                i3 = ghostturntime + 1
+                directionlist3 = ["LEFT"]
+                
+        elif y < yg3:  #pacman paremal yleval
+            if not (lt3 or lb3):  #pacman paremal yleval, vasak serv vaba
+                if not (bl3 or br3):  #pacman paremal yleval, vasak ja alumine serv vaba
+                    directionlist3 = ["LEFT", "DOWN"]
+                else:  #pacman paremal yleval, vasak serv vaba, alumine serv kinni
+                    directionlist3 = ["LEFT"]
+            else:  #pacman paremal yleval, vasak serv kinni
+                if not (bl3 or br3):  #pacman paremal yleval, vasak serv kinni, alumine serv vaba
+                    directionlist3 = ["DOWN"]
+                else:  #pacman paremal yleval, vasak ja alumine serv kinni
+                    directionlist3 = ["RIGHT", "UP"]
+                    
+        elif y > yg3:  #pacman paremal all
+            if not (lt3 or lb3):  #pacman paremal all, vasak serv vaba
+                if not (tl3 or tr3):  #pacman paremal all, vasak ja ylemine serv vaba
+                    directionlist3 = ["LEFT", "UP"]
+                else:  #pacman paremal all, vasak serv vaba, ylemine serv kinni
+                    directionlist3 = ["LEFT"]
+            else:  #pacman paremal all, vasak serv kinni
+                if not (tl3 or tr3):  #pacman paremal all, vasak serv kinni, ylemine serv vaba
+                    directionlist3 = ["UP"]
+                else:  #pacman paremal all, vasak ja ylemine serv kinni
+                    directionlist3 = ["RIGHT", "DOWN"]
+                    
+                
+    elif x == xg3:  
+        if y > yg3:  #pacman all
+            if not (bl3 or br3):
+                i3 = ghostturntime + 1
+                directionlist3 = ["DOWN"]
+        if y < yg3:  #pacman yleval
+            if not (tl3 or tr3):
+                i3 = ghostturntime + 1
+                directionlist3 = ["UP"]
+                
+            
     if i3 > ghostturntime:
-        i3 = 0
+        i3 = random.randint(0, ghostturntime - 20)
         nextdirection3 = random.choice(directionlist3)
     else:
         i3 += 1
-    
         
-        #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
+         
+    #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
     if (nextdirection3 is "LEFT") and not (lt3 or lb3):
         direction3 = nextdirection3
     elif (nextdirection3 is "RIGHT") and not (rt3 or rb3):
         direction3 = nextdirection3
     elif (nextdirection3 is "UP") and not (tl3 or tr3):
-        direction3 = nextdirection3      
+        direction3 = nextdirection3       
     elif (nextdirection3 is "DOWN") and not (bl3 or br3):
         direction3 = nextdirection3
     
@@ -498,6 +753,8 @@ while run:  #kordab igavesti
     else:
         pass
     
+        
+    
     if direction3 is "LEFT":
         xg3 -= vel
     elif direction3 is "RIGHT":
@@ -510,10 +767,109 @@ while run:  #kordab igavesti
         yg3 = yg3
         xg3 = xg3
         i3 = ghostturntime + 1
+        
     else:
         pass
     
     #################################### G H O S T 3 #####################################
+    #################################### G H O S T 4 #####################################
+    
+        #colliderid...  
+    rel_point = sub((xg4, yg4 - 1), [0, 0])
+    if wallmask.get_at(rel_point): 
+        tl4 = True
+    else:
+        tl4 = False               
+    rel_point = sub((xg4 + ghostsize - 1, yg4 - 1), [0, 0])
+    if wallmask.get_at(rel_point): 
+        tr4 = True
+    else:
+        tr4 = False
+    rel_point = sub((xg4 - 1, yg4), [0, 0])
+    if wallmask.get_at(rel_point): 
+        lt4 = True
+    else:
+        lt4 = False        
+    rel_point = sub((xg4 - 1, yg4 + ghostsize - 1), [0, 0])
+    if wallmask.get_at(rel_point): 
+        lb4 = True
+    else:
+        lb4 = False           
+    rel_point = sub((xg4 + ghostsize, yg4), [0, 0])
+    if wallmask.get_at(rel_point): 
+        rt4 = True
+    else:
+        rt4 = False        
+    rel_point = sub((xg4 + ghostsize, yg4 + ghostsize - 1), [0, 0])
+    if wallmask.get_at(rel_point): 
+        rb4 = True
+    else:
+        rb4 = False            
+    rel_point = sub((xg4, yg4 + ghostsize), [0, 0])
+    if wallmask.get_at(rel_point): 
+        bl4 = True
+    else:
+        bl4 = False        
+    rel_point = sub((xg4 + ghostsize - 1, yg4 + ghostsize), [0, 0])
+    if wallmask.get_at(rel_point): 
+        br4 = True
+    else:
+        br4 = False
+        
+        
+    if i4 > ghostturntime:
+        i4 = 0
+        nextdirection4 = random.choice(directionlist4)
+    else:
+        i4 += 1
+    
+        
+        #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
+    if (nextdirection4 is "LEFT") and not (lt4 or lb4):
+        direction4 = nextdirection4
+    elif (nextdirection4 is "RIGHT") and not (rt4 or rb4):
+        direction4 = nextdirection4
+    elif (nextdirection4 is "UP") and not (tl4 or tr4):
+        direction4 = nextdirection4       
+    elif (nextdirection4 is "DOWN") and not (bl4 or br4):
+        direction4 = nextdirection4
+    
+    #kui pacman liigus yhes suunas ja sein tuleb ette (colliderid = True), direction = still
+    elif ((direction4 is "LEFT") and (lt4 or lb4)):
+        direction4 = "STILL"
+        directionlist4 = ["RIGHT", "UP", "DOWN"]
+        i4 = ghostturntime
+    elif ((direction4 is "RIGHT") and (rt4 or rb4)):
+        direction4 = "STILL"
+        directionlist4 = ["LEFT", "UP", "DOWN"]
+        i4 = ghostturntime
+    elif ((direction4 is "UP") and (tl4 or tr4)):
+        direction4 = "STILL"
+        directionlist4 = ["LEFT", "RIGHT", "DOWN"]
+        i4 = ghostturntime
+    elif ((direction4 is "DOWN") and (bl4 or br4)):
+        direction4 = "STILL"
+        directionlist4 = ["LEFT", "RIGHT", "UP"]
+        i4 = ghostturntime
+    else:
+        pass
+    
+    if direction4 is "LEFT":
+        xg4 -= vel
+    elif direction4 is "RIGHT":
+        xg4 += vel        
+    elif direction4 is "UP":
+        yg4 -= vel    
+    elif direction4 is "DOWN":
+        yg4 += vel
+    elif direction4 is "STILL":
+        yg4 = yg4
+        xg4 = xg4
+        i4 = ghostturntime + 1
+    else:
+        pass
+    
+    #################################### G H O S T 4 #####################################
     #################################### G H O S T S #####################################
 
     #print("x =", x, " y =", y, "   ",  "  tl=", tl,"  tr=", tr,"  lt=", lt,"  lb=", lb,"  rt=", rt,"  rb=", rb,"  bl=", bl,"  br=", br,)
@@ -524,6 +880,7 @@ while run:  #kordab igavesti
     ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, ghostsize, ghostsize])
     ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, ghostsize, ghostsize])
     ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, ghostsize, ghostsize])
+    ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, ghostsize, ghostsize])
     pygame.display.update() #update display
     
 pygame.quit()
