@@ -13,14 +13,37 @@ level = 1
 x = 270 #pacmani koordinaat x, alguses 270
 y = 330  #pacmani koordinaat y, alguses 330
 diameter = 30  #pacmani suurus pikslites
+rotation = 0
 ghostsize = 30
 ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
 
-pacmansheet = pygame.image.load("pacmansprites.png").convert()
+
+
+
+
+class Point:
+
+    def createpoint(self, xp, yp):
+        self = pygame.draw.rect(window, (255, 255, 255), [xp, yp, 3, 3])
+
+for n in range(19):
+    for i in range(19):
+        p = Point()
+        p.createpoint(15 + (30 * n), 15 + (30 * i))
+
+
+
+
+
+
+
+
+
+pacmansheet = pygame.image.load("pacmansprite.gif").convert()
 cells = []
-for n in range(6):
+for n in range(5):
     width, height = (30, 30)
-    rect = pygame.Rect(n * width, 0, width, height)
+    rect = pygame.Rect((n - 1) * width, 0, width, height)
     image = pygame.Surface(rect.size).convert()
     image.blit(pacmansheet, (0, 0), rect)
     alpha = image.get_at((0,0))
@@ -29,7 +52,67 @@ for n in range(6):
     
 playerImg = cells[0]
 frame = 1
+
+ghost1sheet = pygame.image.load("ghost1.gif").convert()
+cellsg1 = []
+for n in range(3):
+    width, height = (30, 30)
+    rect = pygame.Rect((n - 1) * width, 0, width, height)
+    image = pygame.Surface(rect.size).convert()
+    image.blit(ghost1sheet, (0, 0), rect)
+    alpha = image.get_at((0,0))
+    image.set_colorkey(alpha)
+    cellsg1.append(image)
+    
+ghost1Img = cellsg1[0]
+frameg1 = 1
+
+ghost2sheet = pygame.image.load("ghost2.gif").convert()
+cellsg2 = []
+for n in range(3):
+    width, height = (30, 30)
+    rect = pygame.Rect((n - 1) * width, 0, width, height)
+    image = pygame.Surface(rect.size).convert()
+    image.blit(ghost2sheet, (0, 0), rect)
+    alpha = image.get_at((0,0))
+    image.set_colorkey(alpha)
+    cellsg2.append(image)
+    
+ghost2Img = cellsg2[0]
+frameg2 = 1
+
+ghost3sheet = pygame.image.load("ghost3.gif").convert()
+cellsg3 = []
+for n in range(3):
+    width, height = (30, 30)
+    rect = pygame.Rect((n - 1) * width, 0, width, height)
+    image = pygame.Surface(rect.size).convert()
+    image.blit(ghost3sheet, (0, 0), rect)
+    alpha = image.get_at((0,0))
+    image.set_colorkey(alpha)
+    cellsg3.append(image)
+    
+ghost3Img = cellsg3[0]
+frameg3 = 1
+
+
+ghost4sheet = pygame.image.load("ghost4.gif").convert()
+cellsg4 = []
+for n in range(3):
+    width, height = (30, 30)
+    rect = pygame.Rect((n - 1) * width, 0, width, height)
+    image = pygame.Surface(rect.size).convert()
+    image.blit(ghost4sheet, (0, 0), rect)
+    alpha = image.get_at((0,0))
+    image.set_colorkey(alpha)
+    cellsg4.append(image)
+    
+ghost4Img = cellsg4[0]
+frameg4 = 1
+
+
 temp = 1
+
 player = playerImg.get_rect()
 player.x = x
 player.y = y
@@ -126,6 +209,7 @@ walls = pygame.image.load("walls" + level + ".png")  #load labyrindi pilt/taust
 window.blit(walls, (0, 0))  #asetab labyrindi/tausta koordinaatidele 0, 0
 wallmask = pygame.mask.from_surface(walls)  #teeb labyrindist maski, et seda colliderina kasutada
 rect1 = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loob ja joonistab pacmani rectangle
+rectcol = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)
 ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, ghostsize, ghostsize])
 ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, ghostsize, ghostsize])
 ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, ghostsize, ghostsize])
@@ -238,20 +322,24 @@ while run:  #kordab igavesti
         
     #pacmani liigutamine soltuvalt suunast(direction)    
     if direction is "LEFT":
+        rotation = 180
         x -= vel
     elif direction is "RIGHT":
-        x += vel        
+        x += vel
+        rotation = 0
     elif direction is "UP":
-        y -= vel    
+        y -= vel
+        rotation = 90
     elif direction is "DOWN":
         y += vel
+        rotation = 270
     elif direction is "STILL":
         y = y
         x = x
     else:
         pass
     
-    if rect1.colliderect(ghost1) or rect1.colliderect(ghost2) or rect1.colliderect(ghost3) or rect1.colliderect(ghost4):  #detect collision, Kui pacman puutub ghosti
+    if rectcol.colliderect(ghost1) or rectcol.colliderect(ghost2) or rectcol.colliderect(ghost3) or rectcol.colliderect(ghost4):  #detect collision, Kui pacman puutub ghosti
         GameOver()
     
      
@@ -895,24 +983,54 @@ while run:  #kordab igavesti
     #print("x =", x, " y =", y, "   ",  "  tl=", tl,"  tr=", tr,"  lt=", lt,"  lb=", lb,"  rt=", rt,"  rb=", rb,"  bl=", bl,"  br=", br,)
     
     window.fill((0, 0, 0))  #taust mustaks
+    
+    for n in range(19):
+        for i in range(19):
+            p = Point()
+            p.createpoint(15 + (30 * n), 15 + (30 * i))
+    
     window.blit(walls, (0, 0))  #lisa labyrint
     
     rect1 = pygame.Rect(x, y, diameter, diameter)  #loo/joonista pacman
-    ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, ghostsize, ghostsize])
-    ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, ghostsize, ghostsize])
-    ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, ghostsize, ghostsize])
-    ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, ghostsize, ghostsize])
+    rectcol = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)
+    ghost1 = pygame.Rect(xg1, yg1, ghostsize, ghostsize)
+    ghost2 = pygame.Rect(xg2, yg2, ghostsize, ghostsize)
+    ghost3 = pygame.Rect(xg3, yg3, ghostsize, ghostsize)
+    ghost4 = pygame.Rect(xg4, yg4, ghostsize, ghostsize)
     
     
-    if temp < 5:
+    if temp < 10:
         temp += 1
     else:
         temp = 1
         frame += 1
+        frameg1 += 1
+        frameg2 += 1
+        frameg3 += 1
+        frameg4 += 1
+        
         if frame >= len(cells):
             frame = 1
+        if frameg1 >= len(cellsg1):
+            frameg1 = 1
+        if frameg2 >= len(cellsg2):
+            frameg2 = 1
+        if frameg3 >= len(cellsg3):
+            frameg3 = 1
+        if frameg4 >= len(cellsg4):
+            frameg4 = 1
+            
     playerImg = cells[frame]    
-    window.blit(playerImg, (x, y))
+    window.blit(pygame.transform.rotate(playerImg, rotation), (x, y))
+    ghost1Img = cellsg1[frameg1]    
+    window.blit(ghost1Img, (xg1, yg1))
+    ghost2Img = cellsg2[frameg2]    
+    window.blit(ghost2Img, (xg2, yg2))
+    ghost3Img = cellsg3[frameg3]    
+    window.blit(ghost3Img, (xg3, yg3))
+    ghost4Img = cellsg4[frameg4]    
+    window.blit(ghost4Img, (xg4, yg4))
+
     pygame.display.update() #update display
     
 pygame.quit()
