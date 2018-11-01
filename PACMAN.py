@@ -16,27 +16,36 @@ diameter = 30  #pacmani suurus pikslites
 rotation = 0
 ghostsize = 30
 ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
+score = 0
 
 
 
 
 
-class Point:
-
-    def createpoint(self, xp, yp):
-        self = pygame.draw.rect(window, (255, 255, 255), [xp, yp, 3, 3])
-
+class Point(object):
+    objs = []
+    def __init__(self, xp, yp, elus, col):
+        Point.objs.append(self)
+        self.elus = True
+        self.xp = xp
+        self.yp = yp
+        self.col = pygame.draw.rect(window, (255, 255, 255), [self.xp, self.yp, 3, 3])
+        
+    @classmethod
+    def draw_all(cls):
+        for obj in cls.objs:
+            if obj.elus:
+               obj.col = pygame.draw.rect(window, (255, 255, 255), [obj.xp, obj.yp, 3, 3])
+        
+    def collect(self):
+        self.elus = False
+        print("collect")
+        
+        
+list = []
 for n in range(19):
     for i in range(19):
-        p = Point()
-        p.createpoint(15 + (30 * n), 15 + (30 * i))
-
-
-
-
-
-
-
+        list.append(Point(15 + (30 * n), 15 + (30 * i), True, pygame.draw.rect(window, (255, 255, 255), [15 + (30 * n), 15 + (30 * i), 3, 3])))
 
 
 pacmansheet = pygame.image.load("pacmansprite.gif").convert()
@@ -342,7 +351,18 @@ while run:  #kordab igavesti
     if rectcol.colliderect(ghost1) or rectcol.colliderect(ghost2) or rectcol.colliderect(ghost3) or rectcol.colliderect(ghost4):  #detect collision, Kui pacman puutub ghosti
         GameOver()
     
-     
+
+    index = 0
+    for n in range(19):
+        for i in range(19):
+            if list[index].col.colliderect(rectcol):
+                if list[index].elus:
+                    list[index].elus = False
+                    score += 1
+                    print(score)
+                
+            index += 1
+
     #################################### P A C M A N #####################################
     #################################### G H O S T S #####################################
     #################################### G H O S T 1 #####################################
@@ -984,10 +1004,14 @@ while run:  #kordab igavesti
     
     window.fill((0, 0, 0))  #taust mustaks
     
+    
+    '''
     for n in range(19):
         for i in range(19):
-            p = Point()
-            p.createpoint(15 + (30 * n), 15 + (30 * i))
+            p = Point(15 + (30 * n), 15 + (30 * i), True)
+            p.draw()'''
+    
+    Point.draw_all()
     
     window.blit(walls, (0, 0))  #lisa labyrint
     
