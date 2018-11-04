@@ -1,8 +1,11 @@
 import pygame
+import pygame.freetype
 import random
 pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 pygame.init()
+
+GAME_FONT = pygame.freetype.Font("emulogic.ttf", 24)
 
 channel1 = pygame.mixer.Channel(1)  #Music channel
 channel2 = pygame.mixer.Channel(2)  #SFX channel
@@ -10,63 +13,74 @@ channel2 = pygame.mixer.Channel(2)  #SFX channel
 chomp = pygame.mixer.Sound("chomp.wav")
 ghostmove = pygame.mixer.Sound("ghostmove.wav")
 death = pygame.mixer.Sound("death.wav")
+beginning = pygame.mixer.Sound("beginning.wav")
 
 
-level = 1
-x = 270 #pacmani koordinaat x, alguses 270
-y = 330  #pacmani koordinaat y, alguses 330
-diameter = 30  #pacmani ja ghostide suurus pikslites
-rotation = 0  #pacmani sprite-i orientatsioon
-ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
-score = 0  #skoor
-temp = 1  #loendur, loeb, mitu korda on main loopi labitud
-vel = 1 #pacmani ja ghostide kiirus. Peab olema 1 voi arvu 30 tegur
-winsize = 570  #Akna suurus, default 570, yks blokk on 30px * 30px, 19 * 19 blokki
+def Reset():
+    global level, x, y, xg1, yg1, xg2, yg2, xg3, yg3, xg4, yg4, diameter, rotation, ghostturntime, score, temp, vel, winsize, i1, i2, i3, i4, list
+    global tl, tr, lt, lb, rt, rb, bl, br, tl1, tr1, lt1, lb1, rt1, rb1, bl1, br1, tl2, tr2, lt2, lb2, rt2, rb2, bl2, br2, tl3, tr3, lt3, lb3, rt3, rb3, bl3, br3, tl4, tr4, lt4, lb4, rt4, rb4, bl4, br4
+    global direction, direction1, direction2, direction3, direction4, nextdirection, nextdirection1, nextdirection2, nextdirection3, nextdirection4,directionlist1, directionlist2, directionlist3, directionlist4
+
+    x = 270 #pacmani koordinaat x, alguses 270
+    y = 330  #pacmani koordinaat y, alguses 330
+    diameter = 30  #pacmani ja ghostide suurus pikslites
+    rotation = 0  #pacmani sprite-i orientatsioon
+    ghostturntime = 100  #ghost muudab suunda iga x pixli tagant
+    score = 0  #skoor
+    temp = 1  #loendur, loeb, mitu korda on main loopi labitud
+    vel = 1 #pacmani ja ghostide kiirus. Peab olema 1 voi arvu 30 tegur
+    winsize = 570  #Akna suurus, default 570, yks blokk on 30px * 30px, 19 * 19 blokki
+    list = []
 
 
-i1 = 0  #ghost 1 counter
-xg1 = 240  #ghost 1 position x
-yg1 = 270  #ghost 1 position y
 
-i2 = 0  #ghost 2 counter
-xg2 = 270  #ghost 2 position x
-yg2 = 270  #ghost 2 position y
+    i1 = 0  #ghost 1 counter
+    xg1 = 240  #ghost 1 position x
+    yg1 = 270  #ghost 1 position y
 
-i3 = 0  #ghost 3 counter
-xg3 = 300  #ghost 3 position x
-yg3 = 270  #ghost 3 position y
+    i2 = 0  #ghost 2 counter
+    xg2 = 270  #ghost 2 position x
+    yg2 = 270  #ghost 2 position y
 
-i4 = 0  #ghost 4 counter
-xg4 = 300  #ghost 4 position x
-yg4 = 270  #ghost 4 position y
+    i3 = 0  #ghost 3 counter
+    xg3 = 300  #ghost 3 position x
+    yg3 = 270  #ghost 3 position y
+
+    i4 = 0  #ghost 4 counter
+    xg4 = 300  #ghost 4 position x
+    yg4 = 270  #ghost 4 position y
 
 
-#Colliders. (none) = pacman, 1 = ghost1, 2 = ghost2, 3 = ghost3, 4 = ghost4
-#tl = topleft, tr = topright, lt = lefttop, lb = leftbottom, rt = righttop, rb = rightbottom, bl = bottomleft, br = bottomright
-tl, tr, lt, lb, rt, rb, bl, br = (False,) * 8  #Pacman colliders
-tl1, tr1, lt1, lb1, rt1, rb1, bl1, br1 = (False,) * 8  #Ghost 1 colliders
-tl2, tr2, lt2, lb2, rt2, rb2, bl2, br2 = (False,) * 8  #Ghost 2 colliders
-tl3, tr3, lt3, lb3, rt3, rb3, bl3, br3 = (False,) * 8  #Ghost 3 colliders
-tl4, tr4, lt4, lb4, rt4, rb4, bl4, br4 = (False,) * 8  #Ghost 4 colliders
+    #Colliders. (none) = pacman, 1 = ghost1, 2 = ghost2, 3 = ghost3, 4 = ghost4
+    #tl = topleft, tr = topright, lt = lefttop, lb = leftbottom, rt = righttop, rb = rightbottom, bl = bottomleft, br = bottomright
+    tl, tr, lt, lb, rt, rb, bl, br = (False,) * 8  #Pacman colliders
+    tl1, tr1, lt1, lb1, rt1, rb1, bl1, br1 = (False,) * 8  #Ghost 1 colliders
+    tl2, tr2, lt2, lb2, rt2, rb2, bl2, br2 = (False,) * 8  #Ghost 2 colliders
+    tl3, tr3, lt3, lb3, rt3, rb3, bl3, br3 = (False,) * 8  #Ghost 3 colliders
+    tl4, tr4, lt4, lb4, rt4, rb4, bl4, br4 = (False,) * 8  #Ghost 4 colliders
 
-#List suundadest, kuhu ghostid saavad minna
-directionlist1 = ["LEFT", "RIGHT", "UP", "DOWN"]
-directionlist2 = ["LEFT", "RIGHT", "UP", "DOWN"]
-directionlist3 = ["LEFT", "RIGHT", "UP", "DOWN"]
-directionlist4 = ["LEFT", "RIGHT", "UP", "DOWN"]
+    #List suundadest, kuhu ghostid saavad minna
+    directionlist1 = ["LEFT", "RIGHT", "UP", "DOWN"]
+    directionlist2 = ["LEFT", "RIGHT", "UP", "DOWN"]
+    directionlist3 = ["LEFT", "RIGHT", "UP", "DOWN"]
+    directionlist4 = ["LEFT", "RIGHT", "UP", "DOWN"]
 
-#Pacmani ja ghostide liikumissuund
-#direction = praegune liikumissuund, nextdirection = liikumissuund, kuhu object esimesel võimalusel läheb
-direction = "STILL"
-nextdirection = "STILL"
-direction1 = "STILL"
-nextdirection1 = "STILL"
-direction2 = "STILL"
-nextdirection2 = "STILL"
-direction3 = "STILL"
-nextdirection3 = "STILL"
-direction4 = "STILL"
-nextdirection4 = "STILL"
+    #Pacmani ja ghostide liikumissuund
+    #direction = praegune liikumissuund, nextdirection = liikumissuund, kuhu object esimesel võimalusel läheb
+    direction = "STILL"
+    nextdirection = "STILL"
+    direction1 = "STILL"
+    nextdirection1 = "STILL"
+    direction2 = "STILL"
+    nextdirection2 = "STILL"
+    direction3 = "STILL"
+    nextdirection3 = "STILL"
+    direction4 = "STILL"
+    nextdirection4 = "STILL"
+
+
+Reset()
+
 
 #Funktsioon, mis lisab skoori
 def AddScore(amount):
@@ -78,13 +92,15 @@ def GameOver():
     print("GAME OVER")
     pygame.mixer.pause()
     channel2.play(death)
-    pygame.time.delay(1500)
+    pygame.time.delay(2000)
     global run
     run = False
+    menu()
 
 #Klass Point. xp = x coord, yp = ycoord, elus = elus/surnud, col = collider
 #draw_all() = joonistab koik elus punktid
 #collect() = Vaatab, kas punkt collidib pacmaniga. Kui jah, siis punkt != elus ja listatakse skoori
+#kill_all() = Tapab koik eelmisest levelist allesjaanud punktid
 class Point(object):
     objs = []
     def __init__(self, xp, yp, elus, col):
@@ -97,25 +113,41 @@ class Point(object):
     @classmethod
     def draw_all(cls):
         for obj in cls.objs:
-            if obj.elus:                
+            if obj.elus:
                 obj.col = pygame.draw.rect(window, (255, 255, 255), [obj.xp, obj.yp, 3, 3])
     @classmethod
     def collect(cls):
         for obj in cls.objs:
             if obj.elus:
-                if obj.col.colliderect(siseRect):
-                    obj.elus = False
-                    AddScore(1)
-                    channel2.play(chomp)
+                if hasattr(obj, "col"):
+                    if obj.col.colliderect(siseRect):
+                        obj.elus = False
+                        AddScore(1)
+                        print(score)
+                        channel2.play(chomp)
+    @classmethod
+    def kill_all(cls):
+        for obj in cls.objs:
+            obj.elus = False
 
 
 window = pygame.display.set_mode((winsize, winsize + 75))  #loob uue akna
 pygame.display.set_caption("PACMAN")  #akna nimetus
+s = pygame.Surface((winsize, winsize + 75))  # the size of your rect
+s.set_alpha(128)                # alpha level
 
-channel1.play(ghostmove, -1)  #Kordab loputult taustaheli
+
+def CreatePoints():
+#Loob 19 * 19 ruudustikus klass Point-i kasutades punktid
+    Point.kill_all() #Tapab koik eelmisest levelist allesjaanud punktid
+    for n in range(19):
+        for i in range(19):
+            list.append(Point(15 + (30 * n), 15 + (30 * i), True, pygame.draw.rect(window, (255, 255, 255), [15 + (30 * n), 15 + (30 * i), 3, 3])))
+
 
 ################## SPRITES ##################
 ################## SPRITES ##################
+logo = pygame.image.load("logo.png")
 
 pacmansheet = pygame.image.load("pacmansprite.gif").convert()
 cells = []
@@ -186,27 +218,75 @@ frameg4 = 1
 ################## SPRITES ##################
 ################## SPRITES ##################
 
+def menu():
+    channel2.play(beginning, -1)
+    xbox = 155
+    count = 0
+    global level
+    level = 1
+    while True:
 
-#Loob 19 * 19 ruudustikus klass Point-i kasutades punktid
-list = []
-for n in range(19):
-    for i in range(19):
-        list.append(Point(15 + (30 * n), 15 + (30 * i), True, pygame.draw.rect(window, (255, 255, 255), [15 + (30 * n), 15 + (30 * i), 3, 3])))
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                exit()
+
+        keys = pygame.key.get_pressed()  #Vaatab, milline klahv on vajutadud
+        count += 1
+        if keys[pygame.K_LEFT] and xbox > 155 :
+            if count > 20:
+                level -= 1
+                count = 0
+                xbox -= 71
+        elif keys[pygame.K_RIGHT] and xbox < 365 :
+            if count > 20:
+                level += 1
+                count = 0
+                xbox += 71
+        elif keys[pygame.K_SPACE]:  #START THE GAME
+            Reset()
+            global walls, wallmask, siseRect, valisRect, ghost1, ghost2, ghost3, ghost4
+            CreatePoints()
+
+            walls = pygame.image.load("walls" + str(level) + ".png")  #load labyrindi pilt/taust
+            #window.blit(walls, (0, 0))  #asetab labyrindi/tausta koordinaatidele 0, 0
+            wallmask = pygame.mask.from_surface(walls)  #teeb labyrindist maski, et seda colliderina kasutada
+            valisRect = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loob ja joonistab pacmani rectangle
+            siseRect = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)
+            ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, diameter, diameter])
+            ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, diameter, diameter])
+            ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, diameter, diameter])
+            ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, diameter, diameter])
+            window.fill((0, 0, 0))
+            pygame.display.update()
+            pygame.mixer.pause()
+            channel1.play(ghostmove, -1)  #Kordab loputult taustaheli
+            global run
+            run = True
+            break
+
+        pygame.time.delay(10)
 
 
-#level = input("Vali level: 1, 2, 3, 4")
+        walls = pygame.image.load("walls" + str(level) + ".png")
+        window.blit(walls, (0, 0))
+        s.fill((0,0,0))
+        window.blit(s, (0,0))
+        window.blit(logo, (50, 100))
+
+        pygame.draw.rect(window, (50, 50, 150), [xbox, 335, 50, 50])
+        GAME_FONT.render_to(window, (150, 270), "SELECT LEVEL", (255, 255, 255))
+        GAME_FONT.render_to(window, (170, 350), "1  2  3  4", (255, 255, 255))
+        GAME_FONT.render_to(window, (200, 600), ("score " + str(score)), (255, 255, 255))
+        pygame.display.update()
 
 
-walls = pygame.image.load("walls" + str(level) + ".png")  #load labyrindi pilt/taust
-window.blit(walls, (0, 0))  #asetab labyrindi/tausta koordinaatidele 0, 0
-wallmask = pygame.mask.from_surface(walls)  #teeb labyrindist maski, et seda colliderina kasutada
-valisRect = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loob ja joonistab pacmani rectangle
-siseRect = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)
-ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, diameter, diameter])
-ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, diameter, diameter])
-ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, diameter, diameter])
-ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, diameter, diameter])
-pygame.display.update()
+
+
+menu()
+
+
+
 
 
 
@@ -237,14 +317,18 @@ while run:  #Main loop
     #################################### P A C M A N #####################################
 
     #colliderid...
-    tl = True if wallmask.get_at([x, y -1]) else False
-    tr = True if wallmask.get_at([x + diameter - 1, y - 1]) else False
-    lt = True if wallmask.get_at([x - 1, y]) else False
-    lb = True if wallmask.get_at([x - 1, y + diameter - 1]) else False
-    rt = True if wallmask.get_at([x + diameter, y]) else False
-    rb = True if wallmask.get_at([x + diameter, y + diameter - 1]) else False
-    bl = True if wallmask.get_at([x, y + diameter]) else False
-    br = True if wallmask.get_at([x + diameter - 1, y + diameter]) else False
+    try:
+        tl = True if wallmask.get_at([x, y -1]) else False
+        tr = True if wallmask.get_at([x + diameter - 1, y - 1]) else False
+        lt = True if wallmask.get_at([x - 1, y]) else False
+        lb = True if wallmask.get_at([x - 1, y + diameter - 1]) else False
+        rt = True if wallmask.get_at([x + diameter, y]) else False
+        rb = True if wallmask.get_at([x + diameter, y + diameter - 1]) else False
+        bl = True if wallmask.get_at([x, y + diameter]) else False
+        br = True if wallmask.get_at([x + diameter - 1, y + diameter]) else False
+    except IndexError:
+        lt, lb, rt, rb = (False,)*4
+        tl, tr, bl, br = (True,)*4
 
 
     #kui nextdirection on midagi, ja rada on vaba, siis liikumissuund(direction) muudetakse
@@ -257,7 +341,7 @@ while run:  #Main loop
     elif (nextdirection == "DOWN") and not (bl or br):
         direction = nextdirection
 
-    #kui pacman liigus yhes suunas ja sein tuleb ette (colliderid = True), pacmna jaab seisma
+    #kui pacman liigub yhes suunas ja sein tuleb ette (colliderid = True), pacman jaab seisma
     elif ((direction == "LEFT") and (lt or lb)):
         direction = "STILL"
     elif ((direction == "RIGHT") and (rt or rb)):
@@ -272,9 +356,13 @@ while run:  #Main loop
     if direction == "LEFT":
         rotation = 180
         x -= vel
+        if x < -30:
+            x = 570
     elif direction == "RIGHT":
         x += vel
         rotation = 0
+        if x > 570:
+            x = -30
     elif direction == "UP":
         y -= vel
         rotation = 90
@@ -291,22 +379,25 @@ while run:  #Main loop
 
     #Kutsutakse klassi Point funktsioon collect()
     Point.collect()
-    print(score)
+
 
     #################################### P A C M A N #####################################
     #################################### G H O S T S #####################################
     #################################### G H O S T 1 #####################################
 
     #colliderid...
-    tl1 = True if wallmask.get_at([xg1, yg1 -1]) else False
-    tr1 = True if wallmask.get_at([xg1 + diameter - 1, yg1 - 1]) else False
-    lt1 = True if wallmask.get_at([xg1 - 1, yg1]) else False
-    lb1 = True if wallmask.get_at([xg1 - 1, yg1 + diameter - 1]) else False
-    rt1 = True if wallmask.get_at([xg1 + diameter, yg1]) else False
-    rb1 = True if wallmask.get_at([xg1 + diameter, yg1 + diameter - 1]) else False
-    bl1 = True if wallmask.get_at([xg1, yg1 + diameter]) else False
-    br1 = True if wallmask.get_at([xg1 + diameter - 1, yg1 + diameter]) else False
-
+    try:
+        tl1 = True if wallmask.get_at([xg1, yg1 -1]) else False
+        tr1 = True if wallmask.get_at([xg1 + diameter - 1, yg1 - 1]) else False
+        lt1 = True if wallmask.get_at([xg1 - 1, yg1]) else False
+        lb1 = True if wallmask.get_at([xg1 - 1, yg1 + diameter - 1]) else False
+        rt1 = True if wallmask.get_at([xg1 + diameter, yg1]) else False
+        rb1 = True if wallmask.get_at([xg1 + diameter, yg1 + diameter - 1]) else False
+        bl1 = True if wallmask.get_at([xg1, yg1 + diameter]) else False
+        br1 = True if wallmask.get_at([xg1 + diameter - 1, yg1 + diameter]) else False
+    except IndexError:
+        lt1, lb1, rt1, rb1 = (False,)*4
+        tl1, tr1, bl1, br1 = (True,)*4
 
     if x > xg1:  #pacman paremal
 
@@ -399,7 +490,7 @@ while run:  #Main loop
     elif (nextdirection1 == "DOWN") and not (bl1 or br1):
         direction1 = nextdirection1
 
-    #kui pacman liigus yhes suunas ja sein tuleb ette (colliderid = True), direction = still
+    #kui ghost1 liigub yhes suunas ja sein tuleb ette (colliderid = True), direction = still
     elif ((direction1 == "LEFT") and (lt1 or lb1)):
         direction1 = "STILL"
         directionlist1 = ["RIGHT", "UP", "DOWN"]
@@ -420,8 +511,12 @@ while run:  #Main loop
 
     if direction1 == "LEFT":
         xg1 -= vel
+        if xg1 < -30:
+            xg1 = 570
     elif direction1 == "RIGHT":
         xg1 += vel
+        if xg1 > 570:
+            xg1 = -30
     elif direction1 == "UP":
         yg1 -= vel
     elif direction1 == "DOWN":
@@ -436,17 +531,20 @@ while run:  #Main loop
     #################################### G H O S T 2 #####################################
 
     #colliderid...
-    tl2 = True if wallmask.get_at([xg2, yg2 -1]) else False
-    tr2 = True if wallmask.get_at([xg2 + diameter - 1, yg2 - 1]) else False
-    lt2 = True if wallmask.get_at([xg2 - 1, yg2]) else False
-    lb2 = True if wallmask.get_at([xg2 - 1, yg2 + diameter - 1]) else False
-    rt2 = True if wallmask.get_at([xg2 + diameter, yg2]) else False
-    rb2 = True if wallmask.get_at([xg2 + diameter, yg2 + diameter - 1]) else False
-    bl2 = True if wallmask.get_at([xg2, yg2 + diameter]) else False
-    br2 = True if wallmask.get_at([xg2 + diameter - 1, yg2 + diameter]) else False
+    try:
+        tl2 = True if wallmask.get_at([xg2, yg2 -1]) else False
+        tr2 = True if wallmask.get_at([xg2 + diameter - 1, yg2 - 1]) else False
+        lt2 = True if wallmask.get_at([xg2 - 1, yg2]) else False
+        lb2 = True if wallmask.get_at([xg2 - 1, yg2 + diameter - 1]) else False
+        rt2 = True if wallmask.get_at([xg2 + diameter, yg2]) else False
+        rb2 = True if wallmask.get_at([xg2 + diameter, yg2 + diameter - 1]) else False
+        bl2 = True if wallmask.get_at([xg2, yg2 + diameter]) else False
+        br2 = True if wallmask.get_at([xg2 + diameter - 1, yg2 + diameter]) else False
+    except IndexError:
+        lt2, lb2, rt2, rb2 = (False,)*4
+        tl2, tr2, bl2, br2 = (True,)*4
 
-
-    if x > xg2:  # pacman paremal
+    if x > xg2:  #pacman paremal
 
         if y > yg2:  #pacman paremal all
             if not (rt2 or rb2):  #pacman paremal all, parem serv vaba
@@ -538,8 +636,12 @@ while run:  #Main loop
 
     if direction2 == "LEFT":
         xg2 -= vel
+        if xg2 < -30:
+            xg2 = 570
     elif direction2 == "RIGHT":
         xg2 += vel
+        if xg2 > 570:
+            xg2 = -30
     elif direction2 == "UP":
         yg2 -= vel
     elif direction2 == "DOWN":
@@ -553,15 +655,23 @@ while run:  #Main loop
     #################################### G H O S T 2 #####################################
     #################################### G H O S T 3 #####################################
 
-        #colliderid...
-    tl3 = True if wallmask.get_at([xg3, yg3 -1]) else False
-    tr3 = True if wallmask.get_at([xg3 + diameter - 1, yg3 - 1]) else False
-    lt3 = True if wallmask.get_at([xg3 - 1, yg3]) else False
-    lb3 = True if wallmask.get_at([xg3 - 1, yg3 + diameter - 1]) else False
-    rt3 = True if wallmask.get_at([xg3 + diameter, yg3]) else False
-    rb3 = True if wallmask.get_at([xg3 + diameter, yg3 + diameter - 1]) else False
-    bl3 = True if wallmask.get_at([xg3, yg3 + diameter]) else False
-    br3 = True if wallmask.get_at([xg3 + diameter - 1, yg3 + diameter]) else False
+    #colliderid...
+    try:
+        tl3 = True if wallmask.get_at([xg3, yg3 -1]) else False
+        tr3 = True if wallmask.get_at([xg3 + diameter - 1, yg3 - 1]) else False
+        lt3 = True if wallmask.get_at([xg3 - 1, yg3]) else False
+        lb3 = True if wallmask.get_at([xg3 - 1, yg3 + diameter - 1]) else False
+        rt3 = True if wallmask.get_at([xg3 + diameter, yg3]) else False
+        rb3 = True if wallmask.get_at([xg3 + diameter, yg3 + diameter - 1]) else False
+        bl3 = True if wallmask.get_at([xg3, yg3 + diameter]) else False
+        br3 = True if wallmask.get_at([xg3 + diameter - 1, yg3 + diameter]) else False
+        if xg3 <= 30:
+            lt3, lb3 = True, True
+        elif xg3 + diameter > 570 - 30:
+            rt3, rb3 = True, True
+    except IndexError:
+        lt3, lb3, rt3, rb3 = (False,)*4
+        tl3, tr3, bl3, br3 = (True,)*4
 
 
     if x < xg3:  # pacman vasakul
@@ -630,13 +740,13 @@ while run:  #Main loop
 
     elif x == xg3:
         if y > yg3:  #pacman all
-            if not (bl3 or br3):
-                i3 = ghostturntime + 1
-                directionlist3 = ["DOWN"]
-        if y < yg3:  #pacman yleval
             if not (tl3 or tr3):
                 i3 = ghostturntime + 1
                 directionlist3 = ["UP"]
+        if y < yg3:  #pacman yleval
+            if not (bl3 or br3):
+                i3 = ghostturntime + 1
+                directionlist3 = ["DOWN"]
 
     #Ghost muudab suunda, kui on piisavalt palju liikunud
     if i3 > ghostturntime:
@@ -656,7 +766,7 @@ while run:  #Main loop
     elif (nextdirection3 == "DOWN") and not (bl3 or br3):
         direction3 = nextdirection3
 
-    #kui pacman liigus yhes suunas ja sein tuleb ette (colliderid = True), direction = still
+    #kui ghost3 liigub yhes suunas ja sein tuleb ette (colliderid = True), direction = still
     elif ((direction3 == "LEFT") and (lt3 or lb3)):
         direction3 = "STILL"
         directionlist3 = ["RIGHT", "UP", "DOWN"]
@@ -678,8 +788,12 @@ while run:  #Main loop
 
     if direction3 == "LEFT":
         xg3 -= vel
+        if xg3 < -30:
+            xg3 = 570
     elif direction3 == "RIGHT":
         xg3 += vel
+        if xg3 > 570:
+            xg3 = -30
     elif direction3 == "UP":
         yg3 -= vel
     elif direction3 == "DOWN":
@@ -693,15 +807,19 @@ while run:  #Main loop
     #################################### G H O S T 3 #####################################
     #################################### G H O S T 4 #####################################
 
-        #colliderid...
-    tl4 = True if wallmask.get_at([xg4, yg4 -1]) else False
-    tr4 = True if wallmask.get_at([xg4 + diameter - 1, yg4 - 1]) else False
-    lt4 = True if wallmask.get_at([xg4 - 1, yg4]) else False
-    lb4 = True if wallmask.get_at([xg4 - 1, yg4 + diameter - 1]) else False
-    rt4 = True if wallmask.get_at([xg4 + diameter, yg4]) else False
-    rb4 = True if wallmask.get_at([xg4 + diameter, yg4 + diameter - 1]) else False
-    bl4 = True if wallmask.get_at([xg4, yg4 + diameter]) else False
-    br4 = True if wallmask.get_at([xg4 + diameter - 1, yg4 + diameter]) else False
+    #colliderid...
+    try:
+        tl4 = True if wallmask.get_at([xg4, yg4 -1]) else False
+        tr4 = True if wallmask.get_at([xg4 + diameter - 1, yg4 - 1]) else False
+        lt4 = True if wallmask.get_at([xg4 - 1, yg4]) else False
+        lb4 = True if wallmask.get_at([xg4 - 1, yg4 + diameter - 1]) else False
+        rt4 = True if wallmask.get_at([xg4 + diameter, yg4]) else False
+        rb4 = True if wallmask.get_at([xg4 + diameter, yg4 + diameter - 1]) else False
+        bl4 = True if wallmask.get_at([xg4, yg4 + diameter]) else False
+        br4 = True if wallmask.get_at([xg4 + diameter - 1, yg4 + diameter]) else False
+    except IndexError:
+        lt4, lb4, rt4, rb4 = (False,)*4
+        tl4, tr4, bl4, br4 = (True,)*4
 
     #Ghost muudab suunda, kui on piisavalt palju liikunud
     if i4 > ghostturntime:
@@ -721,7 +839,7 @@ while run:  #Main loop
     elif (nextdirection4 == "DOWN") and not (bl4 or br4):
         direction4 = nextdirection4
 
-    #kui pacman liigus yhes suunas ja sein tuleb ette (colliderid = True), direction = still
+    #kui ghost3 liigub yhes suunas ja sein tuleb ette (colliderid = True), direction = still
     elif ((direction4 == "LEFT") and (lt4 or lb4)):
         direction4 = "STILL"
         directionlist4 = ["RIGHT", "UP", "DOWN"]
@@ -742,8 +860,12 @@ while run:  #Main loop
 
     if direction4 == "LEFT":
         xg4 -= vel
+        if xg4 < -30:
+            xg4 = 570
     elif direction4 == "RIGHT":
         xg4 += vel
+        if xg4 > 570:
+            xg4 = -30
     elif direction4 == "UP":
         yg4 -= vel
     elif direction4 == "DOWN":
@@ -760,7 +882,6 @@ while run:  #Main loop
     window.fill((0, 0, 0))  #taust mustaks
 
     Point.draw_all()  #joonistab koik elusad punktid
-
     window.blit(walls, (0, 0))  #lisa labyrint
 
     valisRect = pygame.Rect(x, y, diameter, diameter)  #loo pacman
@@ -805,6 +926,7 @@ while run:  #Main loop
     window.blit(ghost3Img, (xg3, yg3))
     ghost4Img = cellsg4[frameg4]
     window.blit(ghost4Img, (xg4, yg4))
+    GAME_FONT.render_to(window, (200, 600), ("score " + str(score)), (255, 255, 255))
 
     pygame.display.update() #update display
 
