@@ -5,18 +5,21 @@ pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.mixer.init()
 pygame.init()
 
+#Load font
 GAME_FONT = pygame.freetype.Font("emulogic.ttf", 24)
 
 channel1 = pygame.mixer.Channel(1)  #Music channel
 channel2 = pygame.mixer.Channel(2)  #SFX channel
 
+#Load sound files
 chomp = pygame.mixer.Sound("chomp.wav")
 ghostmove = pygame.mixer.Sound("ghostmove.wav")
 death = pygame.mixer.Sound("death.wav")
 beginning = pygame.mixer.Sound("beginning.wav")
 
-
+#Taastab koigi muutujate vaartused algasendisse
 def Reset():
+    #Ei oskand muutmoodi, kui muuta koik muutujad globaliks
     global level, x, y, xg1, yg1, xg2, yg2, xg3, yg3, xg4, yg4, diameter, rotation, ghostturntime, score, temp, vel, winsize, i1, i2, i3, i4, list
     global tl, tr, lt, lb, rt, rb, bl, br, tl1, tr1, lt1, lb1, rt1, rb1, bl1, br1, tl2, tr2, lt2, lb2, rt2, rb2, bl2, br2, tl3, tr3, lt3, lb3, rt3, rb3, bl3, br3, tl4, tr4, lt4, lb4, rt4, rb4, bl4, br4
     global direction, direction1, direction2, direction3, direction4, nextdirection, nextdirection1, nextdirection2, nextdirection3, nextdirection4,directionlist1, directionlist2, directionlist3, directionlist4
@@ -30,11 +33,9 @@ def Reset():
     temp = 1  #loendur, loeb, mitu korda on main loopi labitud
     vel = 1 #pacmani ja ghostide kiirus. Peab olema 1 voi arvu 30 tegur
     winsize = 570  #Akna suurus, default 570, yks blokk on 30px * 30px, 19 * 19 blokki
-    list = []
+    list = []  #List, mis hoiab klassi Punkt objecte
 
-
-
-    i1 = 0  #ghost 1 counter
+    i1 = 0  #ghost 1 counter. Kui counter = ghostturntime, siis ghost muudab suunda
     xg1 = 240  #ghost 1 position x
     yg1 = 270  #ghost 1 position y
 
@@ -49,7 +50,6 @@ def Reset():
     i4 = 0  #ghost 4 counter
     xg4 = 300  #ghost 4 position x
     yg4 = 270  #ghost 4 position y
-
 
     #Colliders. (none) = pacman, 1 = ghost1, 2 = ghost2, 3 = ghost3, 4 = ghost4
     #tl = topleft, tr = topright, lt = lefttop, lb = leftbottom, rt = righttop, rb = rightbottom, bl = bottomleft, br = bottomright
@@ -81,13 +81,13 @@ def Reset():
 
 Reset()
 
-
 #Funktsioon, mis lisab skoori
 def AddScore(amount):
     global score
     score += 1
 
 #Funktstioon, mis kutsutakse suremise korral
+#Katkestab taustaheli, mangib suremise heli, valjub main loop-ist, kutsub esile funktsiooni Menu
 def GameOver():
     print("GAME OVER")
     pygame.mixer.pause()
@@ -95,7 +95,7 @@ def GameOver():
     pygame.time.delay(2000)
     global run
     run = False
-    menu()
+    Menu()
 
 #Klass Point. xp = x coord, yp = ycoord, elus = elus/surnud, col = collider
 #draw_all() = joonistab koik elus punktid
@@ -133,10 +133,10 @@ class Point(object):
 
 window = pygame.display.set_mode((winsize, winsize + 75))  #loob uue akna
 pygame.display.set_caption("PACMAN")  #akna nimetus
-s = pygame.Surface((winsize, winsize + 75))  # the size of your rect
-s.set_alpha(128)                # alpha level
+s = pygame.Surface((winsize, winsize + 75))  #poollabipaistev surface
+s.set_alpha(128)                #alpha value
 
-
+#Funktsioon, tapab koik Pointi objektid, ja loob 19*19 ruudustikus uues Point objektid
 def CreatePoints():
 #Loob 19 * 19 ruudustikus klass Point-i kasutades punktid
     Point.kill_all() #Tapab koik eelmisest levelist allesjaanud punktid
@@ -159,8 +159,8 @@ for n in range(5):
     alpha = image.get_at((0,0))
     image.set_colorkey(alpha)
     cells.append(image)
-playerImg = cells[0]
-frame = 1
+playerImg = cells[0]  #Sprite, mis joonistatakse
+frame = 1  #Sprite number, mis valitakse
 
 ghost1sheet = pygame.image.load("ghost1.gif").convert()
 cellsg1 = []
@@ -218,10 +218,11 @@ frameg4 = 1
 ################## SPRITES ##################
 ################## SPRITES ##################
 
-def menu():
-    channel2.play(beginning, -1)
-    xbox = 155
-    count = 0
+#Funktsioon, mis sisaldab menyy joonistamist ja navigeerimist ja leveli valikut ja skoori jms
+def Menu():
+    channel2.play(beginning, -1)  #Mangib loputult algusmuusikat
+    xbox = 155  #Highlighti x coord
+    count = 0  #Counter, mis piirab liiga kiiret leveli valikut
     global level
     level = 1
     while True:
@@ -233,33 +234,34 @@ def menu():
 
         keys = pygame.key.get_pressed()  #Vaatab, milline klahv on vajutadud
         count += 1
-        if keys[pygame.K_LEFT] and xbox > 155 :
-            if count > 20:
+        if keys[pygame.K_LEFT] and xbox > 155 :  #Kui vajutatakse LEFT, siis highlightitakse vasakul pool oleva leveli number
+            if count > 10:
                 level -= 1
                 count = 0
                 xbox -= 71
-        elif keys[pygame.K_RIGHT] and xbox < 365 :
-            if count > 20:
+        elif keys[pygame.K_RIGHT] and xbox < 365 :  #Kui vajutatakse RIGHT, siis highlightitakse paremal pool oleva leveli number
+            if count > 10:
                 level += 1
                 count = 0
                 xbox += 71
-        elif keys[pygame.K_SPACE]:  #START THE GAME
+        elif keys[pygame.K_SPACE]:  #START THE GAME, kutsub funktsiooni Reset() ja CreatePoints()
             Reset()
             global walls, wallmask, siseRect, valisRect, ghost1, ghost2, ghost3, ghost4
             CreatePoints()
 
+            #Loob/joonistab koik vajaliku ekraanile, et tulevad funktsioonid saaksid nende atribuute kasutada
             walls = pygame.image.load("walls" + str(level) + ".png")  #load labyrindi pilt/taust
             #window.blit(walls, (0, 0))  #asetab labyrindi/tausta koordinaatidele 0, 0
             wallmask = pygame.mask.from_surface(walls)  #teeb labyrindist maski, et seda colliderina kasutada
-            valisRect = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loob ja joonistab pacmani rectangle
-            siseRect = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)
-            ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, diameter, diameter])
-            ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, diameter, diameter])
-            ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, diameter, diameter])
-            ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, diameter, diameter])
-            window.fill((0, 0, 0))
-            pygame.display.update()
-            pygame.mixer.pause()
+            valisRect = pygame.draw.rect(window, (255, 255, 0), [x, y, diameter, diameter])  #loob ja joonistab pacmani valimise rectangle
+            siseRect = pygame.Rect(x + 10, y + 10, diameter - 20, diameter - 20)  #loob ja joonistab pacmani sisemise rectangle
+            ghost1 = pygame.draw.rect(window, (255, 0, 0), [xg1, yg1, diameter, diameter])  #loob ghost1 rectangle
+            ghost2 = pygame.draw.rect(window, (255, 184, 255), [xg2, yg2, diameter, diameter])  #loob ghost2 rectangle
+            ghost3 = pygame.draw.rect(window, (255, 184, 82), [xg3, yg3, diameter, diameter])  #loob ghost3 rectangle
+            ghost4 = pygame.draw.rect(window, (0, 255, 255), [xg4, yg4, diameter, diameter])  #loob ghost4 rectangle
+            window.fill((0, 0, 0))  #Taidab ekraani musta varviga, et eelnevalt valedesse kohtadesse joonistatud naha ei jaaks
+            pygame.display.update()  #Update display
+            pygame.mixer.pause()  #Katkestab heli/muusika
             channel1.play(ghostmove, -1)  #Kordab loputult taustaheli
             global run
             run = True
@@ -268,30 +270,24 @@ def menu():
         pygame.time.delay(10)
 
 
-        walls = pygame.image.load("walls" + str(level) + ".png")
-        window.blit(walls, (0, 0))
+        walls = pygame.image.load("walls" + str(level) + ".png")  #Laeb vastavalt eelnevalt valitud levelile labyrindi pildi
+        window.blit(walls, (0, 0))  #Joonistab labyrindi
         s.fill((0,0,0))
-        window.blit(s, (0,0))
-        window.blit(logo, (50, 100))
+        window.blit(s, (0,0))  #Lisab poollabipaistva kihi
+        window.blit(logo, (50, 100))  #Joonistab pacmani logo
 
-        pygame.draw.rect(window, (50, 50, 150), [xbox, 335, 50, 50])
-        GAME_FONT.render_to(window, (150, 270), "SELECT LEVEL", (255, 255, 255))
+        pygame.draw.rect(window, (50, 50, 150), [xbox, 335, 50, 50])  #Joonistab valitud leveli highlighti
+        GAME_FONT.render_to(window, (150, 270), "SELECT LEVEL", (255, 255, 255))  #Lisab teksti
         GAME_FONT.render_to(window, (170, 350), "1  2  3  4", (255, 255, 255))
+        GAME_FONT.render_to(window, (155, 400), "press space", (100, 100, 100))
         GAME_FONT.render_to(window, (200, 600), ("score " + str(score)), (255, 255, 255))
-        pygame.display.update()
+        pygame.display.update()  #Update display
 
-
-
-
-menu()
-
-
-
-
-
-
+#Mangu kaivitamisel kutsutakse funktsioon Menu()
+Menu()
 
 run = True
+###################################### M A I N   L O O P ############################################
 while run:  #Main loop
 
     pygame.time.delay(5)  #Aeg iga kaardi vahel. SIIN SAAB KIIRUST MUUTA. Default 5ms
@@ -929,5 +925,7 @@ while run:  #Main loop
     GAME_FONT.render_to(window, (200, 600), ("score " + str(score)), (255, 255, 255))
 
     pygame.display.update() #update display
+
+###################################### M A I N   L O O P ############################################
 
 pygame.quit()
